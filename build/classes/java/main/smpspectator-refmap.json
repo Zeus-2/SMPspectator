@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "name/modid/mixin/ExampleMixin": {
+      "changeGameMode": "Lnet/minecraft/class_3222;method_7336(Lnet/minecraft/class_1934;)Z"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "name/modid/mixin/ExampleMixin": {
+        "changeGameMode": "Lnet/minecraft/class_3222;method_7336(Lnet/minecraft/class_1934;)Z"
+      }
+    }
+  }
+}

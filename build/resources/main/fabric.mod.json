@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "smpspectator",
+	"version": "1.0.1",
+	"name": "SMPspectator",
+	"description": "Allows players to toggle between Spectator and Survival mode using /s.",
+	"authors": [
+		"YourName"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/YourGithubRepo"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/smpspectator/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"name.modid.SMPspectator"
+		]
+	},
+	"mixins": [
+		"smpspectator.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*",
+		"fabric-permissions-api-v0": "*"
+	}
+}
