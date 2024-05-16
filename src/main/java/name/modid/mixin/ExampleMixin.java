@@ -11,6 +11,5 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ExampleMixin {
 	@Inject(at = @At("HEAD"), method = "changeGameMode")
 	private void onChangeGameMode(GameMode gameMode, CallbackInfoReturnable<Boolean> info) {
-		ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 	}
 }
