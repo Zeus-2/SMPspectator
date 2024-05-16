@@ -1,0 +1,2 @@
+accessible class net/minecraft/server/network/ServerPlayerEntity
+accessible field net/minecraft/server/network/ServerPlayerEntity abilities Lnet/minecraft/entity/player/PlayerAbilities;
