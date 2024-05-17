@@ -3,7 +3,7 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.hasProperty('mod_version') ? project.mod_version : '1.0.0'
+version = project.hasProperty('mod_version') ? project.mod_version : '1.0.1'
 group = project.hasProperty('maven_group') ? project.maven_group : 'com.example'
 
 base {
@@ -19,15 +19,14 @@ repositories {
 }
 
 dependencies {
-	modImplementation "me.lucko:fabric-permissions-api:0.3.1"
-	implementation 'net.luckperms:api:5.4' // Use only this for LuckPerms
 	minecraft "com.mojang:minecraft:${project.hasProperty('minecraft_version') ? project.minecraft_version : '1.20.4'}"
 	mappings "net.fabricmc:yarn:${project.hasProperty('yarn_mappings') ? project.yarn_mappings : '1.20.4+build.3'}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.hasProperty('loader_version') ? project.loader_version : '0.15.10'}"
+	modImplementation "net.fabricmc:fabric-loader:${project.hasProperty('loader_version') ? project.loader_version : '0.15.7'}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.hasProperty('fabric_version') ? project.fabric_version : '0.86.1+1.20.4'}"
-	implementation 'com.google.code.gson:gson:2.8.9'
-	implementation 'org.yaml:snakeyaml:2.2'
-	modImplementation 'me.lucko:fabric-permissions-api:0.3.1' // Ensure this is needed separately from LuckPerms API
+	modImplementation "me.lucko:fabric-permissions-api:0.3.1" // For handling permissions across different mods/plugins
+	implementation 'net.luckperms:api:5.4' // LuckPerms API for specific features if necessary
+	implementation 'com.google.code.gson:gson:2.8.9' // Gson for JSON parsing
+	implementation 'org.yaml:snakeyaml:2.2' // SnakeYAML for YAML parsing
 }
 
 processResources {
