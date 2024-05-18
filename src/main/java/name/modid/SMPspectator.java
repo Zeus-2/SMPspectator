@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.LeadItem;
@@ -116,10 +117,6 @@ public class SMPspectator implements ModInitializer {
 			LOGGER.info("Server is stopping. Saving data...");
 			saveData();
 		});
-
-		// Register the player position handler
-		LOGGER.info("Loading Position handler...");
-		PlayerPositionHandler.register();
 
 		// Register commands
 		LOGGER.info("Registering commands...");
@@ -353,19 +350,27 @@ public class SMPspectator implements ModInitializer {
 	}
 
 
-	private boolean conditionsToEnterSpectator(ServerPlayerEntity player) {
-		// Example condition: Check if the player is holding restricted items
-		boolean isHoldingRestrictedItem = player.getMainHandStack().getItem() instanceof BowItem ||
-				player.getMainHandStack().getItem() instanceof CrossbowItem ||
-				player.getMainHandStack().getItem() instanceof TridentItem ||
-				player.getMainHandStack().getItem() instanceof LeadItem;
+	public boolean conditionsToEnterSpectator(ServerPlayerEntity player) {
+		// Check if the player is currently aiming a bow, crossbow, or trident
+		boolean isAiming = (player.getMainHandStack().getItem() instanceof BowItem && player.isUsingItem()) ||
+				(player.getMainHandStack().getItem() instanceof CrossbowItem && player.isUsingItem() && CrossbowItem.isCharged(player.getMainHandStack())) ||
+				(player.getMainHandStack().getItem() instanceof TridentItem && player.isUsingItem());
 
-		if (isHoldingRestrictedItem) {
-			player.sendMessage(Text.literal("You cannot switch to spectator mode while holding restricted items.").formatted(Formatting.RED));
+		if (isAiming) {
+			player.sendMessage(Text.literal("You cannot switch to spectator mode while aiming a weapon.").formatted(Formatting.RED));
 			return false;
 		}
 
-		// Example condition: Check for negative status effects
+		// Check if the player has an animal on a leash
+		boolean hasAnimalOnLeash = !player.getWorld().getEntitiesByClass(MobEntity.class, player.getBoundingBox().expand(10),
+				entity -> entity.getHoldingEntity() == player).isEmpty();
+
+		if (hasAnimalOnLeash) {
+			player.sendMessage(Text.literal("You cannot switch to spectator mode while having an animal on a leash.").formatted(Formatting.RED));
+			return false;
+		}
+
+		// Check for negative status effects
 		boolean hasNegativeEffect = player.hasStatusEffect(StatusEffects.POISON) ||
 				player.hasStatusEffect(StatusEffects.WEAKNESS) ||
 				player.hasStatusEffect(StatusEffects.SLOWNESS);
@@ -375,9 +380,22 @@ public class SMPspectator implements ModInitializer {
 			return false;
 		}
 
-		// Add more conditions as needed
+		// Ensure the player has at least 4 full hearts
+		if (player.getHealth() < 8.0f) {
+			player.sendMessage(Text.literal("You need at least 4 hearts to switch to spectator mode.").formatted(Formatting.RED));
+			return false;
+		}
+
+		// Check if the player is on the ground
+		if (!player.isOnGround()) {
+			player.sendMessage(Text.literal("You must be touching the ground to switch to spectator mode.").formatted(Formatting.RED));
+			return false;
+		}
+
+		// All conditions passed
 		return true;
 	}
+	// End of modified toggleSpectatorMode method
 
 
 	private void setPlayerSpeed(ServerPlayerEntity player, int speed) {
