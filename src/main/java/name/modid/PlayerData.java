@@ -1,16 +1,15 @@
 package name.modid;
 
-import net.minecraft.util.Identifier;
 import com.google.gson.annotations.Expose;
-
-import java.util.UUID;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.World;
 
 public class PlayerData {
     @Expose private double x, y, z;
     @Expose private float yaw, pitch;
-    @Expose private Identifier world;
+    @Expose private RegistryKey<World> world;  // Use RegistryKey<World> instead of Identifier
 
-    public PlayerData(double x, double y, double z, float yaw, float pitch, Identifier world) {
+    public PlayerData(double x, double y, double z, float yaw, float pitch, RegistryKey<World> world) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -39,7 +38,11 @@ public class PlayerData {
         return pitch;
     }
 
-    public void update(double x, double y, double z, float yaw, float pitch, Identifier world) {
+    public RegistryKey<World> getWorld() {
+        return world;
+    }
+
+    public void update(double x, double y, double z, float yaw, float pitch, RegistryKey<World> world) {
         this.x = x;
         this.y = y;
         this.z = z;

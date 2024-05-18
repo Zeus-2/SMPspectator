@@ -315,59 +315,76 @@ public class SMPspectator implements ModInitializer {
 
 	// Modified toggleSpectatorMode method to include portal proximity check
 	private void toggleSpectatorMode(ServerPlayerEntity player) {
+		LOGGER.info("Attempting to toggle spectator mode for player: " + player.getName().getString());
 		UUID playerId = player.getUuid();
-		PlayerData data = playerDataMap.getOrDefault(playerId, new PlayerData(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch(), player.getWorld().getRegistryKey().getValue()));
+		PlayerData data = playerDataMap.get(playerId);
 
+		if (player.interactionManager.getGameMode() == GameMode.SPECTATOR) {
+			LOGGER.info("Player is in spectator mode, attempting to return to original position...");
+			if (data != null) {
+				ServerWorld targetWorld = player.getServer().getWorld(data.getWorld());
+				if (targetWorld != null) {
+					player.teleport(targetWorld, data.getX(), data.getY(), data.getZ(), data.getYaw(), data.getPitch());
+					player.changeGameMode(GameMode.SURVIVAL);
+					playerDataMap.remove(playerId);
+					saveData();
+					player.sendMessage(createMessage("You are now in SURVIVAL mode.", Formatting.GREEN), false);
+					LOGGER.info("Player returned to SURVIVAL mode successfully.");
+				} else {
+					LOGGER.warn("Target world is null, cannot teleport player.");
+				}
+			} else {
+				player.sendMessage(Text.literal("No original position data found; cannot return to SURVIVAL mode.").formatted(Formatting.RED));
+				LOGGER.warn("No data found for player.");
+			}
+		} else {
+			LOGGER.info("Player is not in spectator mode, checking conditions...");
+			if (player.isOnGround() && conditionsToEnterSpectator(player)) {
+				data = new PlayerData(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch(), player.getWorld().getRegistryKey());
+				playerDataMap.put(playerId, data);
+				player.changeGameMode(GameMode.SPECTATOR);
+				saveData();
+				player.sendMessage(createMessage("You are now in SPECTATOR mode.", Formatting.AQUA), false);
+				LOGGER.info("Player is now in SPECTATOR mode.");
+			} else {
+				LOGGER.info("Conditions to enter spectator mode not met.");
+			}
+		}
+	}
+
+
+	private boolean conditionsToEnterSpectator(ServerPlayerEntity player) {
+		// Example condition: Check if the player is holding restricted items
 		boolean isHoldingRestrictedItem = player.getMainHandStack().getItem() instanceof BowItem ||
 				player.getMainHandStack().getItem() instanceof CrossbowItem ||
 				player.getMainHandStack().getItem() instanceof TridentItem ||
 				player.getMainHandStack().getItem() instanceof LeadItem;
 
+		if (isHoldingRestrictedItem) {
+			player.sendMessage(Text.literal("You cannot switch to spectator mode while holding restricted items.").formatted(Formatting.RED));
+			return false;
+		}
+
+		// Example condition: Check for negative status effects
 		boolean hasNegativeEffect = player.hasStatusEffect(StatusEffects.POISON) ||
 				player.hasStatusEffect(StatusEffects.WEAKNESS) ||
-				player.hasStatusEffect(StatusEffects.BLINDNESS) ||
-				player.hasStatusEffect(StatusEffects.DARKNESS) ||
-				player.hasStatusEffect(StatusEffects.HUNGER) ||
 				player.hasStatusEffect(StatusEffects.SLOWNESS);
 
-		boolean hasSufficientHealth = player.getHealth() >= 8.0f;
-		boolean isNearPortal = isNearPortal(player); // Check if near any portal
-
-		if (player.interactionManager.getGameMode() == GameMode.SPECTATOR) {
-			ServerWorld world = Objects.requireNonNull(player.getServer()).getWorld(player.getWorld().getRegistryKey());
-			if (world != null) {
-				player.teleport(world, data.getX(), data.getY(), data.getZ(), data.getYaw(), data.getPitch());
-				player.changeGameMode(GameMode.SURVIVAL);
-				playerDataMap.remove(playerId);
-				saveData();
-				player.sendMessage(createMessage("You are now in SURVIVAL mode.", Formatting.GREEN), false);
-			}
-		} else {
-			if (!player.isOnGround()) {
-				player.sendMessage(Text.literal("You must be touching the ground to switch to spectator mode.").formatted(Formatting.RED));
-			} else if (isHoldingRestrictedItem) {
-				player.sendMessage(Text.literal("You cannot switch to spectator mode while holding this item.").formatted(Formatting.RED));
-			} else if (hasNegativeEffect) {
-				player.sendMessage(Text.literal("You cannot switch to spectator mode while affected by negative effects.").formatted(Formatting.RED));
-			} else if (isNearPortal) {
-				player.sendMessage(Text.literal("You cannot switch to spectator mode while near a portal.").formatted(Formatting.RED));
-			} else if (!hasSufficientHealth) {
-				player.sendMessage(Text.literal("You need at least 4 hearts to switch to spectator mode.").formatted(Formatting.RED));
-			} else {
-				data.update(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch(), player.getWorld().getRegistryKey().getValue());
-				playerDataMap.put(playerId, data);
-				player.changeGameMode(GameMode.SPECTATOR);
-				saveData();
-				player.sendMessage(createMessage("You are now in SPECTATOR mode.", Formatting.AQUA), false);
-			}
+		if (hasNegativeEffect) {
+			player.sendMessage(Text.literal("You cannot switch to spectator mode while affected by negative status effects.").formatted(Formatting.RED));
+			return false;
 		}
+
+		// Add more conditions as needed
+		return true;
 	}
+
 
 	private void setPlayerSpeed(ServerPlayerEntity player, int speed) {
 		if (player.interactionManager.getGameMode() == GameMode.SPECTATOR) {
 			// Calculate the new fly speed based on some base speed. Minecraft's default is 0.05f.
 			// Let's assume 'speed' is a multiplier where 1 is normal speed, 2 is twice the speed, etc.
-			float baseSpeed = 0.05f;
+			float baseSpeed = 0.10f;
 			float newSpeed = baseSpeed * speed;
 
 			// Set the new fly speed

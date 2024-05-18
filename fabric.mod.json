@@ -1,0 +1,68 @@
+{
+	"schemaVersion": 1,
+	"id": "smpspectator",
+	"version": "1.0.2",
+	"name": "SMPspectator",
+	"description": "Allows players to toggle between Spectator and Survival mode using /s.",
+	"authors": [
+		"zeus2"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/YourGithubRepo"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/smpspectator/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"name.modid.SMPspectator"
+		]
+	},
+	"mixins": [
+		"smpspectator.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"fabric": "*",
+		"minecraft": "1.20.4",
+		"luckperms": "*",
+		"fabric-command-api-v2": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"custom": {
+		"permissions": {
+			"smpspectator.*": {
+				"description": "Gives access to all SMPspectator commands.",
+				"children": {
+					"smpspectator.use": true,
+					"smpspectator.enable": true,
+					"smpspectator.disable": true,
+					"smpspectator.speed": true,
+					"smpspectator.force": true,
+					"smpspectator.reload": true
+				}
+			},
+			"smpspectator.use": {
+				"description": "Allows using the /s command to toggle spectator mode."
+			},
+			"smpspectator.enable": {
+				"description": "Allows enabling of all SMPspectator commands."
+			},
+			"smpspectator.disable": {
+				"description": "Allows disabling all SMPspectator commands."
+			},
+			"smpspectator.speed": {
+				"description": "Allows changing fly speed in spectator mode."
+			},
+			"smpspectator.force": {
+				"description": "Allows forcing other players into and out of spectator mode."
+			},
+			"smpspectator.reload": {
+				"description": "Allows reloading the SMPspectator configuration."
+			}
+		}
+	}
+}
