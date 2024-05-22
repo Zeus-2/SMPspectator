@@ -7,6 +7,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -73,6 +75,17 @@ public class SMPspectatorCommands {
                             return 1;
                         })
                 )
+                .then(CommandManager.literal("effect")
+                        .requires(src -> PermissionHandler.hasPermission(src, "SMPspectator.effect"))
+                        .executes(context -> {
+                            ServerPlayerEntity player = context.getSource().getPlayer();
+                            if (player != null) {
+                                giveNightVision(player);
+                                context.getSource().sendMessage(Text.literal("Infinite Night Vision added.").formatted(Formatting.BLUE));
+                            }
+                            return 1;
+                        })
+                )
                 .then(CommandManager.literal("speed")
                         .requires(src -> ConfigManager.config.enabled && PermissionHandler.hasPermission(src, "smpspectator.speed"))
                         .then(CommandManager.argument("speed", IntegerArgumentType.integer(1, ConfigManager.config.maxSpeed))
@@ -80,7 +93,8 @@ public class SMPspectatorCommands {
                                     ServerPlayerEntity player = context.getSource().getPlayer();
                                     assert player != null;
                                     if (player.interactionManager.getGameMode() != GameMode.SPECTATOR) {
-                                        context.getSource().sendError(Text.literal("This command is only available in Spectator mode."));
+                                        context.getSource().sendMessage(Text.literal("This command is only available in Spectator mode.").formatted(Formatting.RED));
+
                                         return 0;
                                     }
                                     int speed = IntegerArgumentType.getInteger(context, "speed");
@@ -108,5 +122,10 @@ public class SMPspectatorCommands {
         } else {
             player.sendMessage(Text.literal("This command is only available in Spectator mode.").formatted(Formatting.RED), false);
         }
+    }
+
+    private static void giveNightVision(ServerPlayerEntity player) {
+        StatusEffectInstance effect = new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false, true);
+        player.addStatusEffect(effect);
     }
 }
