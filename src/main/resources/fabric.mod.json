@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "smpspectator",
-	"version": "1.0.3",
+	"version": "1.0.5",
 	"name": "SMPspectator",
 	"description": "Allows players to toggle between Spectator and Survival mode using /s.",
 	"authors": [
@@ -42,7 +42,8 @@
 					"smpspectator.disable": true,
 					"smpspectator.speed": true,
 					"smpspectator.force": true,
-					"smpspectator.reload": true
+					"smpspectator.reload": true,
+					"smpspectator.effect": true
 				}
 			},
 			"smpspectator.use": {
@@ -56,6 +57,9 @@
 			},
 			"smpspectator.speed": {
 				"description": "Allows changing fly speed in spectator mode."
+			},
+			"smpspectator.effect": {
+				"description": "Allows night vision in spectator mode."
 			},
 			"smpspectator.force": {
 				"description": "Allows forcing other players into and out of spectator mode."

@@ -2,12 +2,12 @@ package name.modid.data;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
+import java.util.Objects;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,12 +21,24 @@ public class PlayerDataManager {
     private static final Map<UUID, PlayerData> playerData = new HashMap<>();
     private static final Gson gson = new Gson();
 
+
     public static void savePlayerData(ServerPlayerEntity player) {
-        PlayerData data = new PlayerData(player.getX(), player.getY(), player.getZ(),
-                player.getYaw(), player.getPitch(), player.getServerWorld().getRegistryKey().getValue().toString());
-        playerData.put(player.getUuid(), data);
-        saveToFile(); // Save every time a change occurs
+        UUID playerId = player.getUuid();
+        PlayerData newData = new PlayerData(
+                player.getX(), player.getY(), player.getZ(),
+                player.getYaw(), player.getPitch(),
+                player.getServerWorld().getRegistryKey().getValue().toString()
+        );
+
+        PlayerData existingData = playerData.get(playerId);
+
+        // Check if the new data is different from existing data
+        if (!newData.equals(existingData)) {
+            playerData.put(playerId, newData);
+            saveToFile(); // Save the player data to file only if there is a change
+        }
     }
+
 
     public static void loadPlayerData(ServerPlayerEntity player, MinecraftServer server) {
         PlayerData data = playerData.get(player.getUuid());
