@@ -125,7 +125,13 @@ public class SMPspectatorCommands {
     }
 
     private static void giveNightVision(ServerPlayerEntity player) {
-        StatusEffectInstance effect = new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false, true);
-        player.addStatusEffect(effect);
+        // Check if the player is in Spectator mode
+        if (player.interactionManager.getGameMode() == GameMode.SPECTATOR) {
+            StatusEffectInstance effect = new StatusEffectInstance(StatusEffects.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false, true);
+            player.addStatusEffect(effect);
+            player.sendMessage(Text.literal("Night Vision granted.").formatted(Formatting.GREEN));
+        } else {
+            player.sendMessage(Text.literal("Night Vision can only be granted in Spectator mode.").formatted(Formatting.RED));
+        }
     }
 }
